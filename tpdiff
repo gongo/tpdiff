@@ -1,0 +1,20 @@
+#!/bin/sh
+
+readonly escape_ansi=$(printf '\033')
+
+if [ -p /dev/stdin ] ; then
+    cat -
+else
+    if [ ! $# -ge 1 ] ; then
+        echo "$0: [ERROR] You must specify file."
+        exit 1;
+    fi
+
+    if [ ! -f "$1" ] ; then
+        echo "$0: [ERROR] \"$1\" No such file."
+        exit 1;
+    fi
+
+    cat "$1"
+fi | sed -e '/".*" => ".*"$/!b' \
+         -e '/^.*: *"\(.*\)" => "\1"$/!s/.*/'"$escape_ansi"'[31m&'"$escape_ansi"'[m/'
