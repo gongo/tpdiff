@@ -22,6 +22,15 @@ $ # something to do
 $ tpdiff plan_result.txt
 ```
 
+
+INSTALLATION
+------------------------------
+
+```
+$ curl -L https://raw.githubusercontent.com/gongo/tpdiff/master/tpdiff > /usr/local/bin/tpdiff
+$ chmod +x /usr/local/bin/tpdiff
+```
+
 MOTIVATION
 ------------------------------
 
