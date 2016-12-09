@@ -1,6 +1,31 @@
 #!/bin/sh
 
-readonly escape_ansi=$(printf '\033')
+TPDIFF_ANSI_ESCAPE_CODE=${TPDIFF_ANSI_ESCAPE_CODE-$(printf '\033')}
+
+TPDIFF_COLOR_CHANGE=${TPDIFF_COLOR_CHANGE-'[33m'} # yellow
+TPDIFF_COLOR_INSERT=${TPDIFF_COLOR_INSERT-'[32m'} # green
+TPDIFF_COLOR_DELETE=${TPDIFF_COLOR_DELETE-'[31m'} # red
+
+__tpdiff_colorize_to() {
+    (
+        color="$1"
+        escape="$TPDIFF_ANSI_ESCAPE_CODE"
+
+        echo "${escape}${color}&${escape}[m"
+    )
+}
+
+__tpdiff_colorize_change() {
+    __tpdiff_colorize_to "$TPDIFF_COLOR_CHANGE"
+}
+
+__tpdiff_colorize_insert() {
+    __tpdiff_colorize_to "$TPDIFF_COLOR_INSERT"
+}
+
+__tpdiff_colorize_delete() {
+    __tpdiff_colorize_to "$TPDIFF_COLOR_DELETE"
+}
 
 if [ -p /dev/stdin ] ; then
     cat -
@@ -16,5 +41,11 @@ else
     fi
 
     cat "$1"
-fi | sed -e '/".*" => ".*"$/!b' \
-         -e '/^.*: *"\(.*\)" => "\1"$/!s/.*/'"$escape_ansi"'[31m&'"$escape_ansi"'[m/'
+fi | sed -e '
+       /".*" => ".*"$/!b
+       /^.*: *"" => ".\{1,\}"$/  s/.*/'"$(__tpdiff_colorize_insert)"'/
+       t
+       /^.*: *".\{1,\}" => ""$/  s/.*/'"$(__tpdiff_colorize_delete)"'/
+       t
+       /^.*: *"\(.*\)" => "\1"$/!s/.*/'"$(__tpdiff_colorize_change)"'/
+     '

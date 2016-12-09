@@ -13,14 +13,14 @@ TPDIFF_TEST_RUN_SHELL="${TEST_SH:-bash}"
 echo "test shell => $TPDIFF_TEST_RUN_SHELL"
 echo
 
-tpdiff_assert_colorize 'ingress.#: "1" => "2"' 'changed'
-tpdiff_assert_colorize 'ingress.#:  "" => "1"' 'added'
-tpdiff_assert_colorize 'ingress.#: "1" => ""'  'removed'
+tpdiff_assert_colorize_to_change 'ingress.#: "1" => "2"'
+tpdiff_assert_colorize_to_insert 'ingress.#:  "" => "1"'
+tpdiff_assert_colorize_to_delete 'ingress.#: "1" => ""'
 
-tpdiff_assert_not_colorize '+ aws_security_group.app' 'resource description'
-tpdiff_assert_not_colorize 'ingress.#: "1" => "1"'    'no change'
-tpdiff_assert_not_colorize 'ingress.#:  "" => ""'     'no change (empty)'
-tpdiff_assert_not_colorize 'Apply complete!'          'result line'
+tpdiff_assert_not_colorize '+ aws_security_group.app'
+tpdiff_assert_not_colorize 'ingress.#: "1" => "1"'
+tpdiff_assert_not_colorize 'ingress.#:  "" => ""'
+tpdiff_assert_not_colorize 'Apply complete!'
 
 tpdiff_summary
 tpdiff_status
