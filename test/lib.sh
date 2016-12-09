@@ -5,6 +5,12 @@ TPDIFF_TEST_COUNT=0
 TPDIFF_TEST_FAILURE_COUNT=0
 TPDIFF_TEST_RUN_SHELL=bash
 
+# Override `../tpdiff`
+export TPDIFF_ANSI_ESCAPE_CODE=E
+export TPDIFF_COLOR_CHANGE=C
+export TPDIFF_COLOR_INSERT=I
+export TPDIFF_COLOR_DELETE=D
+
 #
 # Usage:
 #
@@ -25,9 +31,6 @@ assert_equal() {
     (
         expect=$1
         actual=$2
-        message=$3
-
-        echo "=> $message"
 
         if [ "$expect" = "$actual" ] ; then
             echo "[OK]"
@@ -40,37 +43,13 @@ assert_equal() {
     )
 }
 
-#
-# Colorize to red
-#
-# Usage:
-#
-#   esc_ansi "text"
-#
-esc_ansi() {
-    (
-        message=$1
-        escape="$(printf '\033')"
-
-        echo "${escape}[31m${message}${escape}[m"
-    )
-}
-
 tpdiff__assert() {
     (
         line=$1
-        message=$2
-        colorize=$3
-
+        expect=$2
         actual=$(echo "$line" | $TPDIFF_TEST_RUN_SHELL $TPDIFF_COMMAND)
 
-        if [ "${colorize}" = "true" ] ; then
-            expect=$(esc_ansi "$line")
-        else
-            expect="$line"
-        fi
-
-        assert_equal "$expect" "$actual" "$message"
+        assert_equal "$expect" "$actual"
     )
 
     if [ ! $? -eq 0 ] ; then
@@ -80,12 +59,20 @@ tpdiff__assert() {
     TPDIFF_TEST_COUNT=$((TPDIFF_TEST_COUNT+1))
 }
 
-tpdiff_assert_colorize() {
-    tpdiff__assert "$1" "$2" 'true'
+tpdiff_assert_colorize_to_change() {
+    tpdiff__assert "$1" "EC${1}E[m"
+}
+
+tpdiff_assert_colorize_to_insert() {
+    tpdiff__assert "$1" "EI${1}E[m"
+}
+
+tpdiff_assert_colorize_to_delete() {
+    tpdiff__assert "$1" "ED${1}E[m"
 }
 
 tpdiff_assert_not_colorize() {
-    tpdiff__assert "$1" "$2" 'false'
+    tpdiff__assert "$1" "$1"
 }
 
 tpdiff_summary() {
